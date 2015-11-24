@@ -3,6 +3,10 @@ authors = ["Tobias Bucher <tobiasbucher5991@gmail.com>"]
 name = "dirs"
 version = "0.1.0"
 
+description = "A library for querying operating system specific directories"
+repository = "https://github.com/tbu-/dirs"
+license = "MIT/Apache-2.0"
+
 [[bin]]
 doc = false
 name = "foobar"
