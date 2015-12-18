@@ -9,6 +9,7 @@ use Result;
 
 pub struct Directories {
     xdg: xdg::BaseDirectories,
+    bin_home: PathBuf,
 }
 
 impl Directories {
@@ -16,18 +17,22 @@ impl Directories {
         -> Result<Directories>
     {
         // FIXME: Classic TOCTOU.
-        let _ = try!(env::home_dir().ok_or(Error::new()));
+        let home = try!(env::home_dir().ok_or(Error::new()));
+        let mut bin_home = home;
+        bin_home.push(".local");
+        bin_home.push("bin");
         Ok(Directories {
-            xdg: xdg::BaseDirectories::with_prefix(prefix_lowercased)
+            xdg: xdg::BaseDirectories::with_prefix(prefix_lowercased),
+            bin_home: bin_home,
         })
     }
     pub fn config_home(&self) -> PathBuf {
         self.xdg.get_config_home()
     }
-    pub fn config_dirs(&self) -> Vec<PathBuf> {
-        self.xdg.get_config_dirs()
-    }
     pub fn cache_home(&self) -> PathBuf {
         self.xdg.get_cache_home()
+    }
+    pub fn bin_home(&self) -> PathBuf {
+        self.bin_home.clone()
     }
 }

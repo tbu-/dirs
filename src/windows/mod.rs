@@ -10,6 +10,7 @@ mod sys;
 pub struct Directories {
     cache_home: PathBuf,
     config_home: PathBuf,
+    bin_home: PathBuf,
 }
 
 impl Directories {
@@ -21,20 +22,22 @@ impl Directories {
             buf.push(prefix_capitalized);
             Ok(buf)
         };
-        let cache_home = try!(get(KnownFolder::LocalAppData));
+        let cache_home = try!(get(KnownFolder::Temp));
         let config_home = try!(get(KnownFolder::RoamingAppData));
+        let bin_home = try!(get(KnownFolder::UserProgramFiles));
         Ok(Directories {
             cache_home: cache_home,
             config_home: config_home,
+            bin_home: bin_home,
         })
     }
     pub fn config_home(&self) -> PathBuf {
         self.config_home.clone()
     }
-    pub fn config_dirs(&self) -> Vec<PathBuf> {
-        vec![]
-    }
     pub fn cache_home(&self) -> PathBuf {
         self.cache_home.clone()
+    }
+    pub fn bin_home(&self) -> PathBuf {
+        self.bin_home.clone()
     }
 }

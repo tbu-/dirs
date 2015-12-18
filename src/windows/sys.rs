@@ -3,6 +3,7 @@ extern crate shell32;
 extern crate uuid;
 extern crate winapi;
 
+use std::env;
 use std::ffi::OsString;
 use std::path::PathBuf;
 use std::ptr;
@@ -10,8 +11,9 @@ use std::slice;
 
 #[derive(Clone, Copy, Debug)]
 pub enum KnownFolder {
-    LocalAppData,
     RoamingAppData,
+    UserProgramFiles,
+    Temp,
 }
 
 pub struct String {
@@ -72,15 +74,21 @@ fn SHGetKnownFolderPath(rfid: &winapi::KNOWNFOLDERID,
     Ok(unsafe { String::new(result) })
 }
 
-fn translate(known_folder: KnownFolder) -> &'static winapi::KNOWNFOLDERID {
-    match known_folder {
-        KnownFolder::LocalAppData => &uuid::FOLDERID_LocalAppData,
+fn translate(known_folder: KnownFolder) -> Option<&'static winapi::KNOWNFOLDERID> {
+    Some(match known_folder {
         KnownFolder::RoamingAppData => &uuid::FOLDERID_RoamingAppData,
-    }
+        KnownFolder::UserProgramFiles => &uuid::FOLDERID_UserProgramFiles,
+        KnownFolder::Temp => return None,
+    })
 }
 
 pub fn known_folder_path(known_folder: KnownFolder) -> Result<PathBuf, ()> {
-    SHGetKnownFolderPath(translate(known_folder), 0, ptr::null_mut())
-        .map(|s| PathBuf::from(s.to_os_string()))
-        .map_err(|_| ())
+    translate(known_folder).map(|id| {
+        SHGetKnownFolderPath(id, 0, ptr::null_mut())
+            .map(|s| PathBuf::from(s.to_os_string()))
+            .map_err(|_| ())
+    }).unwrap_or_else(|| {
+        // KnownFolder::Temp
+        Ok(env::temp_dir())
+    })
 }

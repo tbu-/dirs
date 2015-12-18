@@ -81,34 +81,43 @@ impl Directories {
 
     /// Returns the user-specific directory for configuration files.
     ///
-    /// On Windows, this is the `AppData\Roaming` directory of the current
-    /// user.
+    /// On Windows, this is the `AppData\Roaming\Prefix` directory of the
+    /// current user, corresponding to `FOLDERID_RoamingAppData`.
     ///
     /// On UNIX systems, this is determined by the XDG Base Directory
     /// specification, and can be set by the environment variable
-    /// `XDG_CONFIG_HOME`.
+    /// `XDG_CONFIG_HOME`. It defaults to `~/.config/prefix`.
+    ///
+    /// On OS X, this is `~/Library/Prefix`.
     pub fn config_home(&self) -> PathBuf {
         self.inner.config_home()
     }
 
-    /// Returns additional directories for configuration files, ordered by
-    /// preference.
+    /// Returns the user-specific directory for cache files.
+    ///
+    /// On Windows, this is the `AppData\Local\Temp\Prefix` directory of the
+    /// current user, obtained through `GetTempPath`.
     ///
     /// On UNIX systems, this is determined by the XDG Base Directory
     /// specification, and can be set by the environment variable
-    /// `XDG_CONFIG_DIRS`.
-    pub fn config_dirs(&self) -> Vec<PathBuf> {
-        self.inner.config_dirs()
+    /// `XDG_CACHE_DIR`. It defaults to `~/.cache/prefix`.
+    ///
+    /// On OS X, this is `~/Library/Caches/Prefix`.
+    pub fn cache_home(&self) -> PathBuf {
+        self.inner.cache_home()
     }
 
-    /// Returns the user-specific directory for cache files.
+    /// Returns the user-specific directory for executables.
     ///
-    /// On Windows, this is the `AppData\Local` directory of the current user.
+    /// On Windows, this is the `AppData\Local\Programs\Prefix` directory of
+    /// the current user, corresponding to `FOLDERID_UserProgramFiles`.
     ///
     /// On UNIX systems, this is determined by the XDG Base Directory
     /// specification, and can be set by the environment variable
     /// `XDG_CACHE_DIR`.
-    pub fn cache_home(&self) -> PathBuf {
-        self.inner.cache_home()
+    ///
+    /// On OSX, this is `~/Library/Prefix/bin`.
+    pub fn bin_home(&self) -> PathBuf {
+        self.inner.bin_home()
     }
 }
