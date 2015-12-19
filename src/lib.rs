@@ -11,6 +11,8 @@ mod unix;
 #[cfg(windows)]
 mod windows;
 
+mod error;
+
 #[cfg(all(unix, target_os = "macos"))]
 use osx as platform;
 #[cfg(all(unix, not(target_os = "macos")))]
@@ -18,41 +20,11 @@ use unix as platform;
 #[cfg(windows)]
 use windows as platform;
 
-use std::error;
-use std::fmt;
 use std::path::Path;
 use std::path::PathBuf;
 
-
-/// Error that is returned when the operation system's interfaces cannot be
-/// queried for the path information.
-#[derive(Debug)]
-pub struct Error {
-    _unused: (),
-}
-
-impl Error {
-    fn new() -> Error {
-        Error {
-            _unused: (),
-        }
-    }
-}
-
-impl error::Error for Error {
-    fn description(&self) -> &str {
-        "error getting configuration directories"
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        error::Error::description(self).fmt(f)
-    }
-}
-
-/// A specialized `Result` type for this library.
-pub type Result<T> = std::result::Result<T, Error>;
+pub use error::Error;
+pub use error::Result;
 
 /// The main type of this library. Create one via `Directories::with_prefix`
 /// and use it to query operation system specific paths, such as configuration

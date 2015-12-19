@@ -5,9 +5,14 @@ extern crate winapi;
 
 use std::env;
 use std::ffi::OsString;
+use std::fmt;
 use std::path::PathBuf;
 use std::ptr;
 use std::slice;
+use std;
+
+use Error;
+use error;
 
 #[derive(Clone, Copy, Debug)]
 pub enum KnownFolder {
@@ -20,7 +25,22 @@ pub struct String {
     value: winapi::PWSTR,
     len: usize,
 }
-pub struct Error(winapi::HRESULT);
+
+#[derive(Clone, Copy, Debug)]
+pub struct SHGetKnownFolderPathError(winapi::HRESULT);
+
+impl std::error::Error for SHGetKnownFolderPathError {
+    fn description(&self) -> &str {
+        "SHGetKnownFolderPath returned an error"
+    }
+}
+
+impl fmt::Display for SHGetKnownFolderPathError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let SHGetKnownFolderPathError(code) = *self;
+        write!(f, "{} ({:#010x})", std::error::Error::description(self), code)
+    }
+}
 
 impl String {
     unsafe fn new(value: winapi::PWSTR) -> String {
@@ -61,7 +81,7 @@ impl Drop for String {
 fn SHGetKnownFolderPath(rfid: &winapi::KNOWNFOLDERID,
                         flags: winapi::DWORD,
                         token: winapi::HANDLE)
-    -> Result<String, Error>
+    -> Result<String, SHGetKnownFolderPathError>
 {
     let mut result: winapi::PWSTR = ptr::null_mut();
     let error;
@@ -69,7 +89,7 @@ fn SHGetKnownFolderPath(rfid: &winapi::KNOWNFOLDERID,
         error = shell32::SHGetKnownFolderPath(rfid, flags, token, &mut result);
     }
     if error != winapi::S_OK {
-        return Err(Error(error));
+        return Err(SHGetKnownFolderPathError(error));
     }
     Ok(unsafe { String::new(result) })
 }
@@ -82,11 +102,11 @@ fn translate(known_folder: KnownFolder) -> Option<&'static winapi::KNOWNFOLDERID
     })
 }
 
-pub fn known_folder_path(known_folder: KnownFolder) -> Result<PathBuf, ()> {
+pub fn known_folder_path(known_folder: KnownFolder) -> Result<PathBuf, Error> {
     translate(known_folder).map(|id| {
         SHGetKnownFolderPath(id, 0, ptr::null_mut())
             .map(|s| PathBuf::from(s.to_os_string()))
-            .map_err(|_| ())
+            .map_err(|e| error::from_error(e))
     }).unwrap_or_else(|| {
         // KnownFolder::Temp
         Ok(env::temp_dir())

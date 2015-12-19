@@ -4,8 +4,8 @@ use std::env;
 use std::path::Path;
 use std::path::PathBuf;
 
-use Error;
 use Result;
+use error;
 
 pub struct Directories {
     xdg: xdg::BaseDirectories,
@@ -16,13 +16,14 @@ impl Directories {
     pub fn with_prefix(prefix_lowercased: &Path, _prefix_capitalized: &Path)
         -> Result<Directories>
     {
-        // FIXME: Classic TOCTOU.
-        let home = try!(env::home_dir().ok_or(Error::new()));
+        let home = try!(env::home_dir().ok_or(error::missing_home()));
         let mut bin_home = home;
         bin_home.push(".local");
         bin_home.push("bin");
+        let xdg = try!(xdg::BaseDirectories::with_prefix(prefix_lowercased)
+                       .map_err(|e| error::from_error(e)));
         Ok(Directories {
-            xdg: xdg::BaseDirectories::with_prefix(prefix_lowercased),
+            xdg: xdg,
             bin_home: bin_home,
         })
     }

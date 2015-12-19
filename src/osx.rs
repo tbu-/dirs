@@ -2,8 +2,8 @@ use std::env;
 use std::path::Path;
 use std::path::PathBuf;
 
-use Error;
 use Result;
+use error;
 
 pub struct Directories {
     bin_home: PathBuf,
@@ -15,7 +15,7 @@ impl Directories {
     pub fn with_prefix(_prefix_lowercased: &Path, prefix_capitalized: &Path)
         -> Result<Directories>
     {
-        let mut path = try!(env::home_dir().ok_or(Error::new()));
+        let mut path = try!(env::home_dir().ok_or(error::missing_home()));
         path.push("Library");
 
         let mut cache_home = path.clone();

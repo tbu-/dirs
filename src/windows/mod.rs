@@ -1,7 +1,6 @@
 use std::path::Path;
 use std::path::PathBuf;
 
-use Error;
 use Result;
 use self::sys::KnownFolder;
 
@@ -18,7 +17,7 @@ impl Directories {
         -> Result<Directories>
     {
         let get = |k| {
-            let mut buf = try!(sys::known_folder_path(k).map_err(|()| Error::new()));
+            let mut buf = try!(sys::known_folder_path(k));
             buf.push(prefix_capitalized);
             Ok(buf)
         };
