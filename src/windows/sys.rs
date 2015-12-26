@@ -1,6 +1,5 @@
 extern crate ole32;
 extern crate shell32;
-extern crate uuid;
 extern crate winapi;
 
 use std::env;
@@ -13,6 +12,23 @@ use std;
 
 use Error;
 use error;
+
+#[allow(non_upper_case_globals)]
+mod uuid {
+    use super::winapi::KNOWNFOLDERID;
+    pub static FOLDERID_RoamingAppData: KNOWNFOLDERID = KNOWNFOLDERID {
+        Data1: 1052149211,
+        Data2: 26105,
+        Data3: 19702,
+        Data4: [160, 58, 227, 239, 101, 114, 159, 61],
+    };
+    pub static FOLDERID_UserProgramFiles: KNOWNFOLDERID = KNOWNFOLDERID {
+        Data1: 1557638882,
+        Data2: 8729,
+        Data3: 19047,
+        Data4: [184, 93, 108, 156, 225, 86, 96, 203],
+    };
+}
 
 #[derive(Clone, Copy, Debug)]
 pub enum KnownFolder {
