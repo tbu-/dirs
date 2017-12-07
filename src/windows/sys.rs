@@ -12,6 +12,7 @@ use error::{ DirsError, Result };
 
 pub enum KnownFolder {
     RoamingAppData,
+    LocalAppData,
     UserProgramFiles,
     ProgramData,
     Temp,
@@ -26,6 +27,13 @@ impl Into<api::GUID> for KnownFolder {
                 Data2: 26105,
                 Data3: 19702,
                 Data4: [160, 58, 227, 239, 101, 114, 159, 61],
+            },
+
+            LocalAppData => api::GUID {
+                Data1: 4055050117,
+                Data2: 28602,
+                Data3: 20431,
+                Data4: [157, 85, 123, 142, 127, 21, 112, 145],
             },
 
             UserProgramFiles => api::GUID {
