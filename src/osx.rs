@@ -2,8 +2,7 @@ use std::env;
 use std::path::Path;
 use std::path::PathBuf;
 
-use Result;
-use error;
+use error::{ Result, DirsError };
 
 pub struct Directories {
     bin_home: PathBuf,
@@ -12,18 +11,19 @@ pub struct Directories {
 }
 
 impl Directories {
-    pub fn with_prefix(_prefix_lowercased: &Path, prefix_capitalized: &Path)
-        -> Result<Directories>
+    pub fn with_prefix(prefix: &Path) -> Result<Directories>
     {
-        let mut path = try!(env::home_dir().ok_or(error::missing_home()));
+        // I think it is recommended to use OSX's API to find the path, but I
+        // don't know much about the OSX environment to confirm this.
+        let mut path = env::home_dir().ok_or(DirsError::HomeMissing)?;
         path.push("Library");
 
         let mut cache_home = path.clone();
         cache_home.push("Caches");
-        cache_home.push(prefix_capitalized);
+        cache_home.push(prefix);
 
         let mut config_home = path;
-        config_home.push(prefix_capitalized);
+        config_home.push(prefix);
 
         let mut bin_home = config_home.clone();
         bin_home.push("bin");
@@ -34,13 +34,14 @@ impl Directories {
             config_home: config_home,
         })
     }
-    pub fn config_home(&self) -> PathBuf {
-        self.config_home.clone()
+
+    pub fn config_home(&self) -> &Path {
+        &self.config_home
     }
-    pub fn cache_home(&self) -> PathBuf {
-        self.cache_home.clone()
+    pub fn cache_home(&self) -> &Path {
+        &self.cache_home
     }
-    pub fn bin_home(&self) -> PathBuf {
-        self.bin_home.clone()
+    pub fn bin_home(&self) -> &Path {
+        &self.bin_home
     }
 }
