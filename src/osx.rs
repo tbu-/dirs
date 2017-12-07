@@ -8,6 +8,7 @@ pub struct Directories {
     bin_home: PathBuf,
     cache_home: PathBuf,
     config_home: PathBuf,
+    data_home: PathBuf,
 }
 
 impl Directories {
@@ -28,10 +29,15 @@ impl Directories {
         let mut bin_home = config_home.clone();
         bin_home.push("bin");
 
+        let mut data_home = path.clone();
+        path.push("Application Support");
+        path.push(prefix);
+
         Ok(Directories {
             bin_home: bin_home,
             cache_home: cache_home,
             config_home: config_home,
+            data_home: data_home,
         })
     }
 
@@ -43,5 +49,8 @@ impl Directories {
     }
     pub fn bin_home(&self) -> &Path {
         &self.bin_home
+    }
+    pub fn data_home(&self) -> &Path {
+        &self.data_home
     }
 }
