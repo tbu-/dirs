@@ -19,7 +19,7 @@ use unix as platform;
 use windows as platform;
 
 
-use std::path::{ Path, PathBuf };
+use std::path::Path;
 
 //pub use error::Error;
 use error::Result;
