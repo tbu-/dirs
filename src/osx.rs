@@ -12,7 +12,7 @@ pub struct Directories {
 }
 
 impl Directories {
-    pub fn with_prefix(prefix: &Path) -> Result<Directories>
+    pub fn with_prefix(_: &Path, prefix: &Path) -> Result<Directories>
     {
         // I think it is recommended to use OSX's API to find the path, but I
         // don't know much about the OSX environment to confirm this.

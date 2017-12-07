@@ -12,7 +12,7 @@ pub struct Directories {
 }
 
 impl Directories {
-    pub fn with_prefix<P>(prefix: P) -> Result<Directories>
+    pub fn with_prefix<P>(prefix: P, _: P) -> Result<Directories>
         where P: AsRef<Path>
     {
         let make_path = |var, fallback_path, prefix| 
