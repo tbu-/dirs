@@ -2,8 +2,6 @@
 
 #![warn(missing_docs)]
 
-extern crate xdg;
-
 #[cfg(all(unix, target_os = "macos"))]
 mod osx;
 #[cfg(all(unix, not(target_os = "macos")))]
@@ -20,11 +18,12 @@ use unix as platform;
 #[cfg(windows)]
 use windows as platform;
 
-use std::path::Path;
-use std::path::PathBuf;
 
-pub use error::Error;
-pub use error::Result;
+use std::path::{ Path, PathBuf };
+
+//pub use error::Error;
+use error::Result;
+
 
 /// The main type of this library. Create one via `Directories::with_prefix`
 /// and use it to query operation system specific paths, such as configuration
@@ -44,8 +43,9 @@ impl Directories {
             -> Result<Directories>
         {
             Ok(Directories {
-                inner: try!(platform::Directories::with_prefix(prefix_lowercased,
-                                                               prefix_capitalized)),
+                inner: platform::Directories::with_prefix(
+                        prefix_lowercased,
+                        prefix_capitalized)?,
             })
         }
         with_prefix_(prefix_lowercased.as_ref(), prefix_capitalized.as_ref())
@@ -61,7 +61,7 @@ impl Directories {
     /// `XDG_CONFIG_HOME`. It defaults to `~/.config/prefix`.
     ///
     /// On OS X, this is `~/Library/Prefix`.
-    pub fn config_home(&self) -> PathBuf {
+    pub fn config_home(&self) -> &Path {
         self.inner.config_home()
     }
 
@@ -75,7 +75,7 @@ impl Directories {
     /// `XDG_CACHE_DIR`. It defaults to `~/.cache/prefix`.
     ///
     /// On OS X, this is `~/Library/Caches/Prefix`.
-    pub fn cache_home(&self) -> PathBuf {
+    pub fn cache_home(&self) -> &Path {
         self.inner.cache_home()
     }
 
@@ -89,7 +89,21 @@ impl Directories {
     /// `XDG_CACHE_DIR`.
     ///
     /// On OSX, this is `~/Library/Prefix/bin`.
-    pub fn bin_home(&self) -> PathBuf {
+    pub fn bin_home(&self) -> &Path {
         self.inner.bin_home()
+    }
+
+    /// Returns the user-specific directory for data files.
+    ///
+    /// On Windows, this is the `C:\ProgramData` directory of
+    /// the current user, corresponding to `FOLDERID_ProgramData`.
+    ///
+    /// On UNIX systems, this is determined by the XDG Base Directory
+    /// specification, and can be set by the environment variable
+    /// `XDG_CACHE_DIR`.
+    ///
+    /// On OSX, this is `~/Library/Application Support/Prefix/`.
+    pub fn data_home(&self) -> &Path {
+        self.inner.data_home()
     }
 }
