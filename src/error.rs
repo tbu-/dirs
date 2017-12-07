@@ -1,5 +1,8 @@
+use std::result::Result as RustResult;
+use std::io;
+
 /// A specialized `Result` type for this library.
-pub type Result<T> = std::result::Result<T, DirsError>;
+pub type Result<T> = RustResult<T, DirsError>;
 
 pub enum DirsError {
     VariableMissing(String),
