@@ -17,17 +17,16 @@ impl Directories {
         let make_path = |var, fallback_path, prefix| 
             if let Some(xdg) = env::var_os(var) {
 
-                // Convert the OsString($XDG, or `var`) into a PathBuf and return.
+                // Convert the OsString($XDG, or `var`) into a PathBuf and
+                // return.
                 let mut path: PathBuf = convert::From::from(xdg);
                 path.push(prefix);
                 Ok(path)
 
-            } else if let Some(home) = env::var_os("$HOME") {
-
-                // If `var` is not set, fallback to the defaults.
-                // Convert the OsString($HOME) into a PathBuf and push
-                // some `path` into it.
-                let mut path: PathBuf = convert::From::from(home);
+            } else if let Some(home) = env::home_dir() {
+                
+                // Tries to get the HOME path, and push some `path` into it.
+                let mut path = home;
                 path.push(fallback_path);
                 path.push(prefix);
                 Ok(path)
@@ -36,7 +35,7 @@ impl Directories {
 
                 // At this point, we just give up and return an Err.
                 Err(DirsError::VariableMissing(String::from("$HOME is not set.")))
-                
+
             };
         
         let cache = make_path("$XDG_CACHE_HOME", ".cache", prefix.as_ref());
