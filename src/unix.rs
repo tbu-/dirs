@@ -1,39 +1,64 @@
-extern crate xdg;
-
+use std::convert;
 use std::env;
-use std::path::Path;
-use std::path::PathBuf;
+use std::path::{ Path, PathBuf };
 
-use Result;
-use error;
+use error::{ Result, DirsError };
 
 pub struct Directories {
-    xdg: xdg::BaseDirectories,
-    bin_home: PathBuf,
+    cache_home: PathBuf,
+    config_home: PathBuf,
+    data_home: PathBuf,
 }
 
 impl Directories {
-    pub fn with_prefix(prefix_lowercased: &Path, _prefix_capitalized: &Path)
-        -> Result<Directories>
+    pub fn with_prefix<P>(prefix: P) -> Result<Directories>
+        where P: AsRef<Path>
     {
-        let home = try!(env::home_dir().ok_or(error::missing_home()));
-        let mut bin_home = home;
-        bin_home.push(".local");
-        bin_home.push("bin");
-        let xdg = try!(xdg::BaseDirectories::with_prefix(prefix_lowercased)
-                       .map_err(|e| error::from_error(e)));
+        let make_path = |var, fallback_path, prefix| 
+            if let Some(xdg) = env::var_os(var) {
+
+                // Convert the OsString($XDG, or `var`) into a PathBuf and return.
+                let mut path: PathBuf = convert::From::from(xdg);
+                path.push(prefix);
+                Ok(path)
+
+            } else if let Some(home) = env::var_os("$HOME") {
+
+                // If `var` is not set, fallback to the defaults.
+                // Convert the OsString($HOME) into a PathBuf and push
+                // some `path` into it.
+                let mut path: PathBuf = convert::From::from(home);
+                path.push(fallback_path);
+                path.push(prefix);
+                Ok(path)
+
+            } else {
+
+                // At this point, we just give up and return an Err.
+                Err(DirsError::VariableMissing(String::from("$HOME is not set.")))
+                
+            };
+        
+        let cache = make_path("$XDG_CACHE_HOME", ".cache", prefix.as_ref());
+        let config = make_path("$XDG_CONFIG_HOME", ".config", prefix.as_ref());
+        let data = make_path("$XDG_DATA_HOME", ".local/share", prefix.as_ref());
+
         Ok(Directories {
-            xdg: xdg,
-            bin_home: bin_home,
+            cache_home: cache?,
+            config_home: config?,
+            data_home: data?,
         })
     }
-    pub fn config_home(&self) -> PathBuf {
-        self.xdg.get_config_home()
+
+    pub fn cache_home(&self) -> &Path {
+        &self.cache_home
     }
-    pub fn cache_home(&self) -> PathBuf {
-        self.xdg.get_cache_home()
+
+    pub fn config_home(&self) -> &Path {
+        &self.config_home
     }
-    pub fn bin_home(&self) -> PathBuf {
-        self.bin_home.clone()
+
+    pub fn data_home(&self) -> &Path {
+        &self.data_home
     }
 }
