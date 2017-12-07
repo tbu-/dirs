@@ -9,8 +9,9 @@ pub type Result<T> = RustResult<T, DirsError>;
 #[derive(Debug)]
 pub enum DirsError {
     HomeMissing,
-    ParseError(String),
     IoError(io::Error),
+    ParseError(String),
+    PlatformError(String),
 }
 
 impl From<FromUtf16Error> for DirsError {
