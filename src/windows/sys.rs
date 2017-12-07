@@ -76,7 +76,7 @@ pub fn get_known_folder_path(folder: KnownFolder) -> Result<PathBuf> {
 
             if hresult != api::S_OK {
                 return Err(DirsError::PlatformError(
-                    format!("SHGetKnownFolderPath returned {}", hresult)
+                    format!("SHGetKnownFolderPath returned 0x{:x}", hresult)
                 ))
             }
 
