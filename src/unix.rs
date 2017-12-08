@@ -49,6 +49,7 @@ impl Directories {
                 make_path_fallback(fallback_path, prefix)
             };
 
+        // Since there are no XDG variables for ~./local/bin, fallback.
         let bin = make_path_fallback(".local/bin", prefix.as_ref());
         let cache = make_path("XDG_CACHE_HOME", ".cache", prefix.as_ref());
         let config = make_path("XDG_CONFIG_HOME", ".config", prefix.as_ref());
