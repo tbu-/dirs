@@ -26,7 +26,7 @@ impl Directories {
         let cache_home = get(KnownFolder::Temp)?;
         let config_home = get(KnownFolder::RoamingAppData)?;
         let bin_home = get(KnownFolder::UserProgramFiles)?;
-        let data_home = get(KnownFolder::ProgramData)?;
+        let data_home = get(KnownFolder::LocalAppData)?;
 
         Ok(Directories {
             cache_home: cache_home,
