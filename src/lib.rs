@@ -21,8 +21,8 @@ use windows as platform;
 
 use std::path::Path;
 
-//pub use error::Error;
-use error::Result;
+pub use error::DirsError;
+pub use error::Result;
 
 
 /// The main type of this library. Create one via `Directories::with_prefix`
