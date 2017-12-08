@@ -15,38 +15,41 @@ impl Directories {
     pub fn with_prefix<P>(prefix: P, _: P) -> Result<Directories>
         where P: AsRef<Path>
     {
+        // This is a helper function that is called only when the `XDG`
+        // variables are not found.
+        let make_path_fallback = |fallback_path, prefix| {
+            let home = env::home_dir().ok_or(DirsError::HomeMissing)?;
+            let mut path = home;
+            
+            // Checks if the home path is empty.
+            if path.as_os_str() == "" { 
+                return Err(DirsError::HomeMissing); 
+            }
+            
+            // Push some `path` into it if it's not.
+            path.push(fallback_path);
+            path.push(prefix);
+            Ok(path)
+        };
+
         let make_path = |var, fallback_path, prefix| 
             if let Some(xdg) = env::var_os(var) {
-
                 // Convert the OsString($XDG, or `var`) into a PathBuf and
                 // return.
                 let mut path: PathBuf = convert::From::from(xdg);
-                path.push(prefix);
-                Ok(path)
 
-            } else if let Some(home) = env::home_dir() {
-                let mut path = home;
-                
-                // Checks if the home path is empty.
+                // Checks if the path is empty.
                 if path.as_os_str() == "" { 
                     return Err(DirsError::HomeMissing); 
                 }
-                
-                // Push some `path` into it if it's not.
-                path.push(fallback_path);
+
                 path.push(prefix);
                 Ok(path)
-
             } else {
-
-                // At this point, we just give up and return an Err.
-                Err(DirsError::HomeMissing)
-
+                make_path_fallback(fallback_path, prefix)
             };
-        
-        // The "=" is not allowed in variable names, so it is guaranteed to be
-        // empty, and therefore, force `make_path` to fallback.
-        let bin = make_path("=", ".local/bin", prefix.as_ref());
+
+        let bin = make_path_fallback(".local/bin", prefix.as_ref());
         let cache = make_path("XDG_CACHE_HOME", ".cache", prefix.as_ref());
         let config = make_path("XDG_CONFIG_HOME", ".config", prefix.as_ref());
         let data = make_path("XDG_DATA_HOME", ".local/share", prefix.as_ref());
