@@ -7,11 +7,23 @@ use std::io;
 /// A specialized `Result` type for this library.
 pub type Result<T> = RustResult<T, DirsError>;
 
+/// Error that is returned when the operation system's interfaces cannot be
+/// queried for the path information.
 #[derive(Debug)]
 pub enum DirsError {
+    /// This error occurs when the $HOME variable is not set.
     HomeMissing,
-    IoError(io::Error),
+
+    /// This error occurs when the user don't have required permission for
+    /// the file/directory.
+    IoError(io::Error), 
+
+    /// This error occurs when the Unicode string is invalid and cannot be
+    /// parsed.
     ParseError(String),
+
+    /// This error occurs when there are platform-specific errors such as
+    /// Windows API related errors.
     PlatformError(String),
 }
 
