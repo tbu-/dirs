@@ -1,12 +1,9 @@
-extern crate ole32;
-extern crate shell32;
-extern crate winapi;
-
 use std::env;
 use std::ffi::OsString;
 use std::os::windows::ffi::OsStringExt;
 use std::path::PathBuf;
-use self::winapi as api;
+
+use windows::api;
 
 use error::{ DirsError, Result };
 
@@ -75,14 +72,14 @@ pub fn get_known_folder_path(folder: KnownFolder) -> Result<PathBuf> {
             let mut result = 0 as api::PWSTR;
 
             // Gets the path.
-            let hresult = shell32::SHGetKnownFolderPath(
+            let hresult = api::shlobj::SHGetKnownFolderPath(
                 &rfid as api::REFKNOWNFOLDERID,
                 0u32,
                 0 as api::HANDLE,
                 &mut result
             );
 
-            if hresult != api::S_OK {
+            if hresult != api::winerror::S_OK {
                 return Err(DirsError::PlatformError(
                     format!("SHGetKnownFolderPath returned 0x{:x}", hresult)
                 ))
@@ -104,7 +101,7 @@ pub fn get_known_folder_path(folder: KnownFolder) -> Result<PathBuf> {
             let path: PathBuf = From::from(path);
 
             // Drop the WSTR after all of this, and finally return the path.
-            ole32::CoTaskMemFree(
+            api::combaseapi::CoTaskMemFree(
                 result as api::LPVOID
             );
 

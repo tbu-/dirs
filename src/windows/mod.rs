@@ -4,6 +4,7 @@ use std::path::PathBuf;
 use error::Result;
 use self::sys::KnownFolder;
 
+mod api;
 mod sys;
 
 pub struct Directories {
